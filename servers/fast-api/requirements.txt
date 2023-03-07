@@ -1,0 +1,8 @@
+fastapi==0.92.0
+uvicorn==0.20.0
+aerich==0.7.1
+tortoise-orm==0.19.3
+aiosqlite==0.18.0
+pypika-tortoise==0.1.6
+pydapper==0.7.0
+

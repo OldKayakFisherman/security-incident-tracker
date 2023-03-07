@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from tortoise import Tortoise
+
 from database.register import register_tortoise
 from database.config import TORTOISE_ORM
 
+
+
 app = FastAPI()
 
-# enable schemas to read relationship between models
-Tortoise.init_models(["database.models"], "models")
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,6 +17,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def register_tortoise(
+    app,
+    config: Optional[dict] = None,
+    generate_schemas: bool = False,
+) -> None:
+    @app.on_event("startup")
+    async def init_orm():
+        await Tortoise.init(config=config)
+        if generate_schemas:
+            await Tortoise.generate_schemas()
+
+    @app.on_event("shutdown")
+    async def close_orm():
+        await Tortoise.close_connections()
 
 @app.get("/")
 async def root():

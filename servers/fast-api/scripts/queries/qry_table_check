@@ -1,0 +1,3 @@
+SELECT EXISTS
+(SELECT * FROM sqlite_master
+WHERE tbl_name = ?tablename?)

@@ -3,8 +3,8 @@ import unittest
 from pydapper import connect
 from resources import SchemaReader
 from security import PasswordUtility
-from db import UserRepository
-from db import UserEntity
+from db import UserRepository, UserEntity, DatabaseUtilities
+
 
 SQLITE_DSN = 'sqlite://unit-test:?cache=shared'
 
@@ -18,11 +18,10 @@ def create_unit_test_database():
             cn.execute(statement)
 
 
-
 class UserRepositoryTestCase(unittest.TestCase):
 
     def setUp(self):
-        create_unit_test_database()
+        DatabaseUtilities(SQLITE_DSN).ensure_created()
 
     def tearDown(self):
         os.remove("unit-test")
@@ -41,6 +40,23 @@ class UserRepositoryTestCase(unittest.TestCase):
         eval_user = repo.getUser('somefakeemail@fake.com')
         print(eval_user)
         self.assertIsNotNone(eval_user)
+
+
+class DatabaseUtilitiesTestCase(unittest.TestCase):
+
+    def test_does_table_exist(self):
+        du = DatabaseUtilities(SQLITE_DSN)
+
+        self.assertFalse(du.does_table_exist("users"))
+        self.assertFalse(du.does_table_exist("incidents"))
+
+        du.ensure_created()
+
+        self.assertTrue(du.does_table_exist("users"))
+        self.assertTrue(du.does_table_exist("incidents"))
+
+    def tearDown(self):
+        os.remove("unit-test")
 
 
 if __name__ == '__main__':

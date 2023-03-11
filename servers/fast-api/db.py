@@ -30,6 +30,34 @@ class IncidentEntity:
     other: bool
 
 
+class DatabaseUtilities:
+
+    def __init__(self, dsn):
+        self._dsn = dsn
+
+    def does_table_exist(self, table) -> bool:
+
+        qr = QueryReader()
+        sql = qr.get_table_check_statement()
+
+        with connect(self._dsn) as cn:
+            eval_record = cn.execute_scalar(sql, param={"tablename": table})
+
+        return eval_record
+
+    def ensure_created(self):
+
+        sr = SchemaReader()
+
+        if not self.does_table_exist("users"):
+            with connect(self._dsn) as cn:
+                cn.execute(sr.get_user_table_statement())
+
+        if not self.does_table_exist("incidents"):
+            with connect(self._dsn) as cn:
+                cn.execute(sr.get_incident_table_statement())
+
+
 class UserRepository:
 
     def __init__(self, dsn):
@@ -39,8 +67,8 @@ class UserRepository:
 
     def getUser(self, email: str):
         null_eval = None
-        with connect(self._dsn) as commands:
-            user = commands.query_first_or_default(self._user_by_email,
+        with connect(self._dsn) as cn:
+            user = cn.query_first_or_default(self._user_by_email,
                                                    model=UserEntity,
                                                    default=null_eval,
                                                    param={"email": email}
@@ -52,9 +80,8 @@ class UserRepository:
 
     def add_user(self, user: UserEntity):
 
-        with connect(self._dsn) as commands:
-
-            commands.execute(self._user_insert,
+        with connect(self._dsn) as cn:
+            cn.execute(self._user_insert,
                              param=[{"email": user.email, "password": user.password,
                                     "is_active": user.is_active, "is_admin":user.is_admin}])
 

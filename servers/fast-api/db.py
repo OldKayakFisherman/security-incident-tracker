@@ -1,33 +1,10 @@
-import sqlite3
-from dataclasses import dataclass
+import os
+
 from pydapper import connect
 from resources import SchemaReader, QueryReader
-
-@dataclass
-class UserEntity:
-    id: int
-    email: str
-    password: str
-    is_active: bool
-    is_admin: bool
-
-
-@dataclass
-class IncidentEntity:
-    id: int
-    external_case_number: str
-    ip: str
-    pen_tester: bool
-    region: str
-    country: str
-    description: str
-    script_injection: bool
-    command_injection: bool
-    sql_injection: bool
-    cross_frame_scripting: bool
-    path_discovery: bool
-    cross_site_request_forgery: bool
-    other: bool
+from config import Settings
+from entities import UserEntity, IncidentEntity
+from security import PasswordUtility
 
 
 class DatabaseUtilities:
@@ -53,10 +30,37 @@ class DatabaseUtilities:
             with connect(self._dsn) as cn:
                 cn.execute(sr.get_user_table_statement())
 
+                # Create the default users
+                settings = Settings()
+                pu = PasswordUtility()
+                ur = UserRepository(self._dsn)
+
+                admin_email = settings.get_default_admin_username()
+                admin_password = pu.get_password_hash(settings.get_default_admin_password())
+                default_admin = UserEntity(None, admin_email, admin_password, True, True)
+
+                ur.add_user(default_admin)
+
+                normy_email = settings.get_default_normy_username()
+                normy_password = pu.get_password_hash(settings.get_default_normy_password())
+
+                default_normie = UserEntity(None, normy_email, normy_password, True, False)
+
+                ur.add_user(default_normie)
+
         if not self.does_table_exist("incidents"):
             with connect(self._dsn) as cn:
                 cn.execute(sr.get_incident_table_statement())
 
+    def ensure_destroyed(self, database_name):
+        with connect(self._dsn) as cn:
+            if self.does_table_exist('incidents'):
+                cn.execute("drop table incidents")
+
+            if self.does_table_exist('users'):
+                cn.execute("drop table users")
+
+            os.remove(database_name)
 
 class UserRepository:
 

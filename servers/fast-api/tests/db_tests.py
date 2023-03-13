@@ -8,7 +8,7 @@ from db import UserRepository, UserEntity, DatabaseUtilities
 
 SQLITE_DSN = 'sqlite://unit-test:?cache=shared'
 
-
+"""
 def create_unit_test_database():
 
     statements = SchemaReader().get_schema_statements()
@@ -17,6 +17,8 @@ def create_unit_test_database():
         for statement in statements:
             cn.execute(statement)
 
+"""
+
 
 class UserRepositoryTestCase(unittest.TestCase):
 
@@ -24,7 +26,7 @@ class UserRepositoryTestCase(unittest.TestCase):
         DatabaseUtilities(SQLITE_DSN).ensure_created()
 
     def tearDown(self):
-        os.remove("unit-test")
+        DatabaseUtilities(SQLITE_DSN).ensure_destroyed('unit-test')
 
     def test_add_user(self):
 
@@ -56,7 +58,7 @@ class DatabaseUtilitiesTestCase(unittest.TestCase):
         self.assertTrue(du.does_table_exist("incidents"))
 
     def tearDown(self):
-        os.remove("unit-test")
+        DatabaseUtilities(SQLITE_DSN).ensure_destroyed('unit-test')
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS incidents
+CREATE TABLE incidents
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     external_case_number TEXT NOT NULL UNIQUE,

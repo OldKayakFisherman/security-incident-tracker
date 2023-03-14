@@ -8,17 +8,6 @@ from db import UserRepository, UserEntity, DatabaseUtilities
 
 SQLITE_DSN = 'sqlite://unit-test:?cache=shared'
 
-"""
-def create_unit_test_database():
-
-    statements = SchemaReader().get_schema_statements()
-
-    with connect(SQLITE_DSN) as cn:
-        for statement in statements:
-            cn.execute(statement)
-
-"""
-
 
 class UserRepositoryTestCase(unittest.TestCase):
 

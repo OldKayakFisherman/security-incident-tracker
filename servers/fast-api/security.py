@@ -4,6 +4,36 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from passlib.context import CryptContext
 from config import Settings
+from db import UserRepository
+
+
+class Token:
+    access_token: str
+    token_type: str
+
+
+class SystemUser:
+    username: str
+    role: str
+
+
+class AuthenticationUtility:
+
+    def __int__(self, dsn):
+        self._user_repository = UserRepository(dsn)
+        self._pu = PasswordUtility()
+
+    def authenticate_user(self, username, password) -> SystemUser:
+
+        retval = None
+        user_entity = self._user_repository.getUser(username)
+
+        if user_entity is not None:
+            retval = SystemUser()
+            retval.username = user_entity.email
+            retval.role = "normy" if user_entity.is_admin else "admin"
+        return retval
+
 
 class PasswordUtility:
 

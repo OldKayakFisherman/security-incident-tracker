@@ -37,3 +37,5 @@ class Settings:
     def get_default_normy_password(self):
         return self._default_normy_password
 
+    def get_database_url(self):
+        return self._database_url
